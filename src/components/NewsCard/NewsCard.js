@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect, createRef } from "react";
 import {
   Card,
   CardActions,
@@ -8,17 +8,45 @@ import {
   CardMedia,
   Button,
 } from "@material-ui/core";
-import useStyles from './styles';
+import useStyles from "./styles";
+import classnames from "classnames";
 
 const NewsCard = ({
   article: { description, publishedAt, source, title, url, urlToImage },
   i,
+  activeArticle,
 }) => {
-    const classes=useStyles();
+  const classes = useStyles();
+  const [elRefs, setElRefs] = useState([]);
+  const scrollToRef = (ref) => window.scroll(0, ref.current.offsetTop - 50);
+
+  useEffect(() => {
+    window.scroll(0, 0);
+
+    setElRefs((refs) =>
+      Array(20)
+        .fill()
+        .map((_, j) => refs[j] || createRef())
+    );
+  }, []);
+
+  useEffect(() => {
+    if (i === activeArticle && elRefs[activeArticle]) {
+      scrollToRef(elRefs[activeArticle]);
+    }
+  }, [i, activeArticle, elRefs]);
+
   return (
-    <Card className={classes.card}>
-      <CardActionArea href={url} target='_blank'>
-        <CardMedia className={classes.media}
+    <Card
+      ref={elRefs[i]}
+      className={classnames(
+        classes.card,
+        activeArticle === i ? classes.activeCard : null
+      )}
+    >
+      <CardActionArea href={url} target="_blank">
+        <CardMedia
+          className={classes.media}
           image={
             urlToImage ||
             "https://c4.wallpaperflare.com/wallpaper/598/699/634/disha-patani-women-actress-model-bollywood-actresses-hd-wallpaper-preview.jpg"
